@@ -2,27 +2,60 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ListView
+        android:id="@+id/lv_queue"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible" />
+
+    <EditText
+        android:id="@+id/editText.name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button.connect"
+        android:layout_centerHorizontal="true"
+        android:ems="12"
+        android:hint="Enter name" />
+
     <Button
-        android:id="@+id/button.startServer"
+        android:id="@+id/button.connect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:text="Connect" />
 
+    <Button
+        android:id="@+id/button.refresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="Refresh list"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/button.enter.queue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:text="Enter Queue"
+        android:visibility="gone" />
+
+
     <ImageView
         android:id="@+id/imageViewCanvas"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="invisible" />
 
-    <TextView
+    <ImageView
+        android:id="@+id/enemyFinger"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ping: "
-        android:id="@+id/textViewPing"
-        android:textSize="32sp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
+        android:src="@drawable/circle"
+        android:visibility="invisible" />
 </RelativeLayout>

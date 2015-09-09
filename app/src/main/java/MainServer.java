@@ -26,6 +26,18 @@ public class MainServer {
             }
         }
 
+        @Override
+        public void requestPair(ConnectedDevice device, String pairName) {
+            for (ConnectedDevice queuedDevice : queuedDevices) {
+                if (pairName.equals(queuedDevice.getName())) {
+                    queuedDevices.remove(queuedDevice);
+                    queuedDevice.setPair(device);
+                    device.setPair(queuedDevice);
+                    break;
+                }
+            }
+        }
+
     };
     private static Thread connectionsThread = new Thread(new Runnable() {
         @Override
