@@ -20,6 +20,9 @@
             </intent-filter>
         </activity>
         <service android:name="com.backendless.AndroidService" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="7f85e6107052d127548bd1e629d46411ca030ad2" />
     </application>
 
 </manifest>
