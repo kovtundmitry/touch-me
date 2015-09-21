@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">touch-me</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="hint.login">E-mail</string>
+    <string name="hint.name">Name</string>
+    <string name="hint.password">Password</string>
+    <string name="bt.login">Login</string>
+    <string name="bt.register">Register</string>
 </resources>
