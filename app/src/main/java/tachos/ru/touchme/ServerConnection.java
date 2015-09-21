@@ -37,6 +37,8 @@ public class ServerConnection {
                     if (isPaired) {
                         int x = Integer.valueOf(in.readLine());
                         int y = Integer.valueOf(in.readLine());
+                        if (y == -20 && x != -20 && x != -121)
+                            x = y = Integer.valueOf(in.readLine());
                         Log.d("Incoming coords: ", "" + x + " " + y);
                         commandXYReceived(x, y);
                         continue;
