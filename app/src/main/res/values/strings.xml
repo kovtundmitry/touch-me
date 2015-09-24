@@ -3,6 +3,7 @@
     <string name="hint.login">E-mail</string>
     <string name="hint.name">Name</string>
     <string name="hint.password">Password</string>
-    <string name="bt.login">Login</string>
-    <string name="bt.register">Register</string>
+    <string name="button.login">Login</string>
+    <string name="button.register">Register</string>
+    <string name="button.logout">LogOut</string>
 </resources>

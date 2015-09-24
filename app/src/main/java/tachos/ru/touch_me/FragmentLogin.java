@@ -1,7 +1,7 @@
 package tachos.ru.touch_me;
 
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +19,6 @@ public class FragmentLogin extends Fragment {
     EditText etName;
     EditText etPassword;
 
-    public FragmentLogin() {
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -32,35 +29,40 @@ public class FragmentLogin extends Fragment {
         root.findViewById(R.id.bt_login_login).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                login(etLogin.getText().toString(), etPassword.getText().toString());
+                login(etLogin.getText().toString(), etPassword.getText().toString(), true);
             }
         });
         root.findViewById(R.id.bt_login_register).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                register(etLogin.getText().toString(), etName.getText().toString(), etPassword.getText().toString());
+                register(etLogin.getText().toString(), etName.getText().toString(), etPassword.getText().toString(), true);
             }
         });
         return root;
     }
 
-    private void login(String email, String password) {
-        Backendless.UserService.login(email, password, new BackendlessCallback<BackendlessUser>() {
-            @Override
-            public void handleFault(BackendlessFault fault) {
-                Toast.makeText(getActivity(), "Error logging in: " + fault.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.d("Registration", "Error logging in: " + fault.getMessage());
-            }
+    private void login(String email, String password, boolean stayLoggedIn) {
+        Backendless.UserService.login(email,
+                password,
+                new BackendlessCallback<BackendlessUser>() {
+                    @Override
+                    public void handleFault(BackendlessFault fault) {
+                        Toast.makeText(getActivity(), "Error logging in: " + fault.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d("Registration", "Error logging in: " + fault.getMessage());
+                    }
 
-            @Override
-            public void handleResponse(BackendlessUser backendlessUser) {
-                Toast.makeText(getActivity(), backendlessUser.getEmail() + " successfully logged in", Toast.LENGTH_SHORT).show();
-                Log.d("Registration", backendlessUser.getEmail() + " successfully logged in");
-            }
-        });
+                    @Override
+                    public void handleResponse(BackendlessUser backendlessUser) {
+                        Toast.makeText(getActivity(), backendlessUser.getEmail() + " successfully logged in", Toast.LENGTH_SHORT).show();
+                        Log.d("Registration", backendlessUser.getEmail() + " successfully logged in");
+                        DataManager.startLastActivityUpdater();
+                        ((MainActivity) getActivity()).startFragmentUsers();
+                    }
+                },
+                stayLoggedIn);
     }
 
-    private void register(String email, String name, String password) {
+    private void register(final String email, String name, final String password, final boolean stayLoggedIn) {
         BackendlessUser user = new BackendlessUser();
         user.setEmail(email);
         user.setProperty("name", name);
@@ -76,6 +78,7 @@ public class FragmentLogin extends Fragment {
             public void handleResponse(BackendlessUser backendlessUser) {
                 Toast.makeText(getActivity(), backendlessUser.getEmail() + " successfully registered", Toast.LENGTH_SHORT).show();
                 Log.d("Registration", backendlessUser.getEmail() + " successfully registered");
+                login(email, password, stayLoggedIn);
             }
         });
     }
