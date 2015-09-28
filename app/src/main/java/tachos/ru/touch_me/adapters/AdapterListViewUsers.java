@@ -1,4 +1,4 @@
-package tachos.ru.touch_me;
+package tachos.ru.touch_me.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +8,9 @@ import android.widget.TextView;
 
 import java.util.Date;
 import java.util.List;
+
+import tachos.ru.touch_me.R;
+import tachos.ru.touch_me.data.Users;
 
 public class AdapterListViewUsers extends BaseAdapter {
     private List<Users> users;

@@ -6,4 +6,5 @@
     <string name="button.login">Login</string>
     <string name="button.register">Register</string>
     <string name="button.logout">LogOut</string>
+    <string name="button.game.exit">Exit</string>
 </resources>

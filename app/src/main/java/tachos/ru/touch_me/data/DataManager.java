@@ -1,4 +1,4 @@
-package tachos.ru.touch_me;
+package tachos.ru.touch_me.data;
 
 import android.util.Log;
 
@@ -33,14 +33,12 @@ public class DataManager {
                             return;
                         }
                         if (!isInForeground || (System.currentTimeMillis() - lastOnlineSend < timeBetweenUpdates && lastTouch - lastTouchSend < timeBetweenTouches)) {
-                            Log.d("test", (isInForeground) ? "Sleeping, too early to update" : "Sleeping, app in foreground");
                             try {
                                 Thread.sleep(timeBetweenTouches);
                             } catch (InterruptedException e) {
                                 return;
                             }
                         } else {
-                            Log.d("test", "Updating online info");
                             updateLastActivity();
                         }
                     }
@@ -52,18 +50,15 @@ public class DataManager {
 
     public static void setLastTouch(long touchTime) {
         lastTouch = touchTime;
-        Log.d("test", "Touched");
     }
 
     public static void setIsUpdaterInForeground(boolean appInForeground) {
         isInForeground = appInForeground;
-        Log.d("test", "Updater foreground: " + appInForeground);
     }
 
     public static void stopLastActivityUpdater() {
         if (lastActivityUpdater != null) lastActivityUpdater.interrupt();
         lastActivityUpdater = null;
-        Log.d("test", "Stopping updater");
     }
 
     public static void getUsers(AsyncCallback<BackendlessCollection<Users>> asyncCallback) {
@@ -72,6 +67,7 @@ public class DataManager {
         queryOptions.addSortByOption("lastOnline DESC");
         queryOptions.setPageSize(usersPageSize);
         dataQuery.setQueryOptions(queryOptions);
+        dataQuery.setWhereClause("objectId != \'" + Backendless.UserService.CurrentUser().getUserId()+"\'");
         Backendless.Persistence.of(Users.class).find(dataQuery, asyncCallback);
     }
 
@@ -81,14 +77,12 @@ public class DataManager {
             try {
                 if (lastTouch - lastTouchSend > timeBetweenTouches) {
                     user.setProperty("lastTouch", lastTouch);
-                    Log.d("test", "Updating touch time");
                 }
                 user.setProperty("lastOnline", System.currentTimeMillis());
                 Backendless.UserService.setCurrentUser(Backendless.UserService.update(user));
                 user = Backendless.UserService.CurrentUser();
                 lastOnlineSend = (user.getProperty("lastOnline") != null) ? ((Date) user.getProperty("lastOnline")).getTime() : 0;
                 lastTouchSend = (user.getProperty("lastTouch") != null) ? ((Date) user.getProperty("lastTouch")).getTime() : 0;
-                Log.d("test", "updated is set " + lastOnlineSend + " last touch: " + lastTouch);
             } catch (BackendlessException e) {
                 Log.d("test", "updating last activity error: " + e.getMessage());
             }

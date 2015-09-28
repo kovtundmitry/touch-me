@@ -1,4 +1,4 @@
-package tachos.ru.touch_me;
+package tachos.ru.touch_me.data;
 
 public class Users {
     private String objectId;

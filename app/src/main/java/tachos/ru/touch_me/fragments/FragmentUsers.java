@@ -1,12 +1,15 @@
-package tachos.ru.touch_me;
+package tachos.ru.touch_me.fragments;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.backendless.Backendless;
@@ -16,12 +19,19 @@ import com.backendless.exceptions.BackendlessFault;
 
 import java.util.ArrayList;
 
+import tachos.ru.touch_me.MainActivity;
+import tachos.ru.touch_me.Messenger;
+import tachos.ru.touch_me.R;
+import tachos.ru.touch_me.adapters.AdapterListViewUsers;
+import tachos.ru.touch_me.data.DataManager;
+import tachos.ru.touch_me.data.Users;
+
 public class FragmentUsers extends Fragment {
     ListView lvUsers;
     AdapterListViewUsers adapterUsers;
     ArrayList<Users> users = new ArrayList<>();
 
-    private void startUsersUpdater() {
+    private void startUsersUpdater(long time) {
         if (getActivity() == null) return;
         (new Handler()).postDelayed(new Runnable() {
             @Override
@@ -32,19 +42,22 @@ public class FragmentUsers extends Fragment {
                         users.clear();
                         users.addAll(response.getData());
                         adapterUsers.notifyDataSetChanged();
-                        Log.d("test", "users acquired");
-                        Log.d("test", "users acquired " + response.getData());
-                        startUsersUpdater();
+                        startUsersUpdater(10000);
                     }
 
                     @Override
                     public void handleFault(BackendlessFault fault) {
                         Log.d("test", "error acquiring users: " + fault.getMessage());
-                        startUsersUpdater();
+                        startUsersUpdater(10000);
                     }
                 });
             }
-        }, 10000);
+        }, time);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     @Override
@@ -54,6 +67,24 @@ public class FragmentUsers extends Fragment {
         lvUsers = ((ListView) root.findViewById(R.id.lv_users_list));
         adapterUsers = new AdapterListViewUsers(users, inflater);
         lvUsers.setAdapter(adapterUsers);
+        lvUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Messenger.sendInvite(users.get(position).getObjectId());
+                MainActivity.currDialog = new AlertDialog.Builder(getActivity()).create();
+                MainActivity.currDialog.setTitle("Invite send");
+                MainActivity.currDialog.setCancelable(false);
+                MainActivity.currDialog.setMessage("Waiting for response");
+                MainActivity.currDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "NOOOO", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Messenger.cancelInvitation();
+                        dialog.dismiss();
+                    }
+                });
+                MainActivity.currDialog.show();
+            }
+        });
         root.findViewById(R.id.bt_users_logout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -71,7 +102,7 @@ public class FragmentUsers extends Fragment {
                 });
             }
         });
-        startUsersUpdater();
+        startUsersUpdater(0);
         return root;
     }
 }

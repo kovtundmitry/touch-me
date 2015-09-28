@@ -1,4 +1,4 @@
-package tachos.ru.touch_me;
+package tachos.ru.touch_me.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -13,6 +13,11 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.BackendlessCallback;
 import com.backendless.exceptions.BackendlessFault;
+
+import tachos.ru.touch_me.MainActivity;
+import tachos.ru.touch_me.Messenger;
+import tachos.ru.touch_me.R;
+import tachos.ru.touch_me.data.DataManager;
 
 public class FragmentLogin extends Fragment {
     EditText etLogin;
@@ -56,6 +61,7 @@ public class FragmentLogin extends Fragment {
                         Toast.makeText(getActivity(), backendlessUser.getEmail() + " successfully logged in", Toast.LENGTH_SHORT).show();
                         Log.d("Registration", backendlessUser.getEmail() + " successfully logged in");
                         DataManager.startLastActivityUpdater();
+                        Messenger.registerDevice();
                         ((MainActivity) getActivity()).startFragmentUsers();
                     }
                 },
