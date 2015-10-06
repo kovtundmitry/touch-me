@@ -5,9 +5,16 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -17,16 +24,27 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
+import com.backendless.files.BackendlessFile;
 import com.backendless.persistence.local.UserTokenStorageFactory;
 import com.crashlytics.android.Crashlytics;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.utils.L;
+
+import java.io.File;
+import java.io.IOException;
 
 import io.fabric.sdk.android.Fabric;
+import tachos.ru.touch_me.data.Avatar;
 import tachos.ru.touch_me.data.DataManager;
 import tachos.ru.touch_me.fragments.FragmentLogin;
 import tachos.ru.touch_me.fragments.FragmentUsers;
 import tachos.ru.touch_me.fragments.GameFragment;
 
 public class MainActivity extends Activity {
+    public static final int REQUEST_CODE_PICTURE_SELECT = 1717;
+    public static final int REQUEST_CODE_PICTURE_CROP = 1718;
     static final int MESSAGE_GAME_INVITE = 1;
     static final int MESSAGE_GAME_ACCEPTED = 2;
     static final int MESSAGE_GAME_DECLINED = 3;
@@ -39,6 +57,12 @@ public class MainActivity extends Activity {
         Fabric.with(this, new Crashlytics());
         initBackendless();
         initHandler();
+
+        DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true).build();
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).defaultDisplayImageOptions(defaultOptions).build();
+        ImageLoader.getInstance().init(config);
+        L.writeLogs(false);
+
         setContentView(R.layout.activity_main);
 
         String userToken = UserTokenStorageFactory.instance().getStorage().get();
@@ -164,4 +188,74 @@ public class MainActivity extends Activity {
         transaction.commit();
     }
 
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent imageReturnedIntent) {
+        Log.d("test", "Activity result " + requestCode + " " + resultCode);
+        switch (requestCode) {
+            case REQUEST_CODE_PICTURE_SELECT:
+                if (resultCode == RESULT_OK) {
+                    Uri selectedImage = imageReturnedIntent.getData();
+                    performCrop(selectedImage);
+                }
+                break;
+            case REQUEST_CODE_PICTURE_CROP:
+                if (resultCode == RESULT_OK) {
+                    Bitmap selectedBitmap = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() + "/tempAva.jpg");
+                    Backendless.Files.Android.upload(
+                            selectedBitmap,
+                            Bitmap.CompressFormat.JPEG, 100,
+                            Backendless.UserService.CurrentUser().getUserId() + ".jpg",
+                            Avatar.generatePathToAva(Backendless.UserService.CurrentUser().getUserId()),
+                            new AsyncCallback<BackendlessFile>() {
+                                @Override
+                                public void handleResponse(final BackendlessFile backendlessFile) {
+                                    Log.d("test", "Uploaded successfully");
+
+                                }
+
+                                @Override
+                                public void handleFault(BackendlessFault backendlessFault) {
+                                    Log.d("test", "Failed to upload " + backendlessFault.getMessage());
+                                }
+                            });
+                }
+                break;
+        }
+    }
+
+
+    private void performCrop(Uri picUri) {
+        try {
+
+            Intent cropIntent = new Intent("com.android.camera.action.CROP");
+            // indicate image type and Uri
+            cropIntent.setDataAndType(picUri, "image/*");
+            // set crop properties
+            cropIntent.putExtra("crop", "true");
+            // indicate aspect of desired crop
+            cropIntent.putExtra("aspectX", 3);
+            cropIntent.putExtra("aspectY", 4);
+            // indicate output X and Y
+            cropIntent.putExtra("outputX", 768);
+            cropIntent.putExtra("outputY", 1024);
+            // retrieve data on return
+            cropIntent.putExtra("return-data", true);
+            cropIntent.putExtra("scale", true);
+            File f = new File(Environment.getExternalStorageDirectory(), "tempAva.jpg");
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+            }
+            cropIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+            // start the activity - we handle returning in onActivityResult
+            startActivityForResult(cropIntent, REQUEST_CODE_PICTURE_CROP);
+        }
+        // respond to users whose devices do not support the crop action
+        catch (ActivityNotFoundException anfe) {
+            // display an error message
+            String errorMessage = "Whoops - your device doesn't support the crop action!";
+            Toast toast = Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT);
+            toast.show();
+        }
+    }
 }

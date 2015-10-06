@@ -3,6 +3,8 @@ package tachos.ru.touch_me.fragments;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -16,6 +18,9 @@ import com.backendless.Backendless;
 import com.backendless.BackendlessCollection;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import java.util.ArrayList;
 
@@ -23,6 +28,7 @@ import tachos.ru.touch_me.MainActivity;
 import tachos.ru.touch_me.Messenger;
 import tachos.ru.touch_me.R;
 import tachos.ru.touch_me.adapters.AdapterListViewUsers;
+import tachos.ru.touch_me.data.Avatar;
 import tachos.ru.touch_me.data.DataManager;
 import tachos.ru.touch_me.data.Users;
 
@@ -36,21 +42,22 @@ public class FragmentUsers extends Fragment {
         (new Handler()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                DataManager.getUsers(new AsyncCallback<BackendlessCollection<Users>>() {
-                    @Override
-                    public void handleResponse(BackendlessCollection<Users> response) {
-                        users.clear();
-                        users.addAll(response.getData());
-                        adapterUsers.notifyDataSetChanged();
-                        startUsersUpdater(10000);
-                    }
+                if (getActivity() != null)
+                    DataManager.getUsers(new AsyncCallback<BackendlessCollection<Users>>() {
+                        @Override
+                        public void handleResponse(BackendlessCollection<Users> response) {
+                            users.clear();
+                            users.addAll(response.getData());
+                            adapterUsers.notifyDataSetChanged();
+                            startUsersUpdater(10000);
+                        }
 
-                    @Override
-                    public void handleFault(BackendlessFault fault) {
-                        Log.d("test", "error acquiring users: " + fault.getMessage());
-                        startUsersUpdater(10000);
-                    }
-                });
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            Log.d("test", "error acquiring users: " + fault.getMessage());
+                            startUsersUpdater(10000);
+                        }
+                    });
             }
         }, time);
     }
@@ -65,7 +72,7 @@ public class FragmentUsers extends Fragment {
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_users, container, false);
         lvUsers = ((ListView) root.findViewById(R.id.lv_users_list));
-        adapterUsers = new AdapterListViewUsers(users, inflater);
+        adapterUsers = new AdapterListViewUsers(users, getActivity());
         lvUsers.setAdapter(adapterUsers);
         lvUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -103,6 +110,22 @@ public class FragmentUsers extends Fragment {
             }
         });
         startUsersUpdater(0);
+
+        ImageLoader.getInstance().loadImage(Avatar.generateFullPathToAva(Backendless.UserService.CurrentUser().getUserId()), new SimpleImageLoadingListener() {
+            @Override
+            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                // Do whatever you want with Bitmap
+                Log.d("test", "Image loaded");
+            }
+
+            @Override
+            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                Log.d("test", "Image failed to load " + failReason.toString());
+                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                photoPickerIntent.setType("image/*");
+                getActivity().startActivityForResult(photoPickerIntent, MainActivity.REQUEST_CODE_PICTURE_SELECT);
+            }
+        });
         return root;
     }
 }
