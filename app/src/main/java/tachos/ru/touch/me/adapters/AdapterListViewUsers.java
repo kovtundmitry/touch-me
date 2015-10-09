@@ -1,4 +1,4 @@
-package tachos.ru.touch_me.adapters;
+package tachos.ru.touch.me.adapters;
 
 import android.app.Activity;
 import android.os.Build;
@@ -12,9 +12,9 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.List;
 
-import tachos.ru.touch_me.R;
-import tachos.ru.touch_me.data.Avatar;
-import tachos.ru.touch_me.data.Users;
+import tachos.ru.touch.me.R;
+import tachos.ru.touch.me.data.Avatar;
+import tachos.ru.touch.me.data.Users;
 
 public class AdapterListViewUsers extends BaseAdapter {
     private List<Users> users;

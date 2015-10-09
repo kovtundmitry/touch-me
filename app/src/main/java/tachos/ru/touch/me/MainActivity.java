@@ -1,4 +1,4 @@
-package tachos.ru.touch_me;
+package tachos.ru.touch.me;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -25,18 +25,22 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.utils.L;
 
 import io.fabric.sdk.android.Fabric;
-import tachos.ru.touch_me.data.DataManager;
-import tachos.ru.touch_me.fragments.FragmentLogin;
-import tachos.ru.touch_me.fragments.FragmentMissingAvatar;
-import tachos.ru.touch_me.fragments.FragmentUsers;
-import tachos.ru.touch_me.fragments.GameFragment;
+import tachos.ru.touch.me.data.DataManager;
+import tachos.ru.touch.me.fragments.FragmentLogin;
+import tachos.ru.touch.me.fragments.FragmentMissingAvatar;
+import tachos.ru.touch.me.fragments.FragmentUsers;
+import tachos.ru.touch.me.fragments.GameFragment;
 
 public class MainActivity extends Activity {
     static final int MESSAGE_GAME_INVITE = 1;
     static final int MESSAGE_GAME_ACCEPTED = 2;
     static final int MESSAGE_GAME_DECLINED = 3;
+    private static final int CURR_FRAGMENT_GAME = 1;
+    private static final int CURR_FRAGMENT_USERS = 2;
     public static AlertDialog currDialog = null;
     static Handler handlerMessages;
+    public static String partnerId = "";
+    private int currFragment = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +50,7 @@ public class MainActivity extends Activity {
         initHandler();
 
         DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true)
-        .showImageOnLoading(android.R.drawable.ic_lock_lock) // resource or drawable
+                .showImageOnLoading(android.R.drawable.ic_lock_lock) // resource or drawable
                 .showImageForEmptyUri(android.R.drawable.ic_media_next) // resource or drawable
                 .showImageOnFail(android.R.drawable.ic_menu_close_clear_cancel).build();
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).defaultDisplayImageOptions(defaultOptions).build();
@@ -92,10 +96,10 @@ public class MainActivity extends Activity {
     private void initHandler() {
         handlerMessages = new Handler() {
             public void handleMessage(final android.os.Message msg) {
-                final String partnerId = msg.obj.toString();
+                final String pId = msg.obj.toString();
                 switch (msg.what) {
                     case MESSAGE_GAME_INVITE:
-                        Backendless.UserService.findById(partnerId, new AsyncCallback<BackendlessUser>() {
+                        Backendless.UserService.findById(pId, new AsyncCallback<BackendlessUser>() {
                             @Override
                             public void handleResponse(BackendlessUser response) {
                                 currDialog = new AlertDialog.Builder(MainActivity.this).create();
@@ -105,14 +109,14 @@ public class MainActivity extends Activity {
                                 currDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Agree", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         Toast.makeText(MainActivity.this, "Trying to connect", Toast.LENGTH_SHORT).show();
-                                        Messenger.sendInviteResponse(partnerId, true);
+                                        Messenger.sendInviteResponse(pId, true);
                                         dialog.dismiss();
                                     }
                                 });
                                 currDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Nope", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        Messenger.sendInviteResponse(partnerId, false);
+                                        Messenger.sendInviteResponse(pId, false);
                                         dialog.dismiss();
                                     }
                                 });
@@ -126,6 +130,7 @@ public class MainActivity extends Activity {
                         break;
                     case MESSAGE_GAME_ACCEPTED:
                         currDialog.dismiss();
+                        partnerId = pId;
                         startFragmentGame();
                         break;
                     case MESSAGE_GAME_DECLINED:
@@ -135,6 +140,22 @@ public class MainActivity extends Activity {
                 }
             }
         };
+    }
+
+    @Override
+    public void onBackPressed() {
+        switch (currFragment) {
+            default: {
+                super.onBackPressed();
+                break;
+            }
+            case CURR_FRAGMENT_GAME: {
+                startFragmentUsers();
+                if (ServerConnection.getInstance() != null)
+                    ServerConnection.getInstance().disconnect();
+                break;
+            }
+        }
     }
 
     @Override
@@ -162,6 +183,7 @@ public class MainActivity extends Activity {
     }
 
     public void startFragmentGame() {
+        currFragment = CURR_FRAGMENT_GAME;
         replaceFragment(new GameFragment());
     }
 
@@ -173,6 +195,7 @@ public class MainActivity extends Activity {
     }
 
     public void startFragmentUsers() {
+        currFragment = CURR_FRAGMENT_USERS;
         replaceFragment(new FragmentUsers());
     }
 

@@ -1,4 +1,4 @@
-package tachos.ru.touch_me.fragments;
+package tachos.ru.touch.me.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -25,9 +25,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-import tachos.ru.touch_me.MainActivity;
-import tachos.ru.touch_me.R;
-import tachos.ru.touch_me.data.Avatar;
+import tachos.ru.touch.me.MainActivity;
+import tachos.ru.touch.me.R;
+import tachos.ru.touch.me.data.Avatar;
 
 public class FragmentMissingAvatar extends Fragment {
     private static final int REQUEST_CODE_PICTURE_SELECT = 1717;

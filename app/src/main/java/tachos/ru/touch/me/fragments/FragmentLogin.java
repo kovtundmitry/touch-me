@@ -1,4 +1,4 @@
-package tachos.ru.touch_me.fragments;
+package tachos.ru.touch.me.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -14,10 +14,10 @@ import com.backendless.BackendlessUser;
 import com.backendless.async.callback.BackendlessCallback;
 import com.backendless.exceptions.BackendlessFault;
 
-import tachos.ru.touch_me.MainActivity;
-import tachos.ru.touch_me.Messenger;
-import tachos.ru.touch_me.R;
-import tachos.ru.touch_me.data.DataManager;
+import tachos.ru.touch.me.MainActivity;
+import tachos.ru.touch.me.Messenger;
+import tachos.ru.touch.me.R;
+import tachos.ru.touch.me.data.DataManager;
 
 public class FragmentLogin extends Fragment {
     EditText etLogin;

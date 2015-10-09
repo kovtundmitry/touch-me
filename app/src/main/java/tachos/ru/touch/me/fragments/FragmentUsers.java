@@ -1,9 +1,8 @@
-package tachos.ru.touch_me.fragments;
+package tachos.ru.touch.me.fragments;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,13 +23,13 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 
 import java.util.ArrayList;
 
-import tachos.ru.touch_me.MainActivity;
-import tachos.ru.touch_me.Messenger;
-import tachos.ru.touch_me.R;
-import tachos.ru.touch_me.adapters.AdapterListViewUsers;
-import tachos.ru.touch_me.data.Avatar;
-import tachos.ru.touch_me.data.DataManager;
-import tachos.ru.touch_me.data.Users;
+import tachos.ru.touch.me.MainActivity;
+import tachos.ru.touch.me.Messenger;
+import tachos.ru.touch.me.R;
+import tachos.ru.touch.me.adapters.AdapterListViewUsers;
+import tachos.ru.touch.me.data.Avatar;
+import tachos.ru.touch.me.data.DataManager;
+import tachos.ru.touch.me.data.Users;
 
 public class FragmentUsers extends Fragment {
     ListView lvUsers;
@@ -120,7 +119,7 @@ public class FragmentUsers extends Fragment {
 
             @Override
             public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                ((MainActivity)getActivity()).displayMissingAvatar(true);
+                ((MainActivity) getActivity()).displayMissingAvatar(true);
                 //No avatar
                 Log.d("test", "Image failed to load " + failReason.toString());
             }

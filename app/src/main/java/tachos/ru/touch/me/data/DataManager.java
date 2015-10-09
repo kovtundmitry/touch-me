@@ -1,4 +1,4 @@
-package tachos.ru.touch_me.data;
+package tachos.ru.touch.me.data;
 
 import android.util.Log;
 
