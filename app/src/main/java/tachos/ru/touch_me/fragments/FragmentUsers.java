@@ -114,16 +114,15 @@ public class FragmentUsers extends Fragment {
         ImageLoader.getInstance().loadImage(Avatar.generateFullPathToAva(Backendless.UserService.CurrentUser().getUserId()), new SimpleImageLoadingListener() {
             @Override
             public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                // Do whatever you want with Bitmap
+//Ava загружена
                 Log.d("test", "Image loaded");
             }
 
             @Override
             public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                ((MainActivity)getActivity()).displayMissingAvatar(true);
+                //No avatar
                 Log.d("test", "Image failed to load " + failReason.toString());
-                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-                photoPickerIntent.setType("image/*");
-                getActivity().startActivityForResult(photoPickerIntent, MainActivity.REQUEST_CODE_PICTURE_SELECT);
             }
         });
         return root;

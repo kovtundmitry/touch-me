@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="text.online">#00FF00</color>
-    <color name="text.away">#FFFF00</color>
+    <color name="text.away">#ffcc00</color>
     <color name="text.offline">#FF0000</color>
 </resources>
