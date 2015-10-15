@@ -3,6 +3,7 @@ package tachos.ru.touch.me.fragments;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -50,7 +51,13 @@ public class FragmentMissingAvatar extends Fragment {
         root.findViewById(R.id.bt_missing_avatar_take_photo).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.TITLE, "New Picture");
+                values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
+                imageUri = getActivity().getContentResolver().insert(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
                 Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                cameraIntent    .putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
                 startActivityForResult(cameraIntent, REQUEST_CODE_CAMERA);
             }
         });
@@ -65,19 +72,22 @@ public class FragmentMissingAvatar extends Fragment {
         return root;
     }
 
-
+    Uri imageUri;
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d("test", "Activity result " + requestCode + " " + resultCode);
         switch (requestCode) {
             case REQUEST_CODE_CAMERA:
-                Bitmap photo = (Bitmap) data.getExtras().get("data");
-                if (photo != null) {
-                    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                    photo.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-                    String path = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), photo, "temp", null);
-                    performCrop(Uri.parse(path));
-                }
+/*                String path = null;
+                try {
+                    path = MediaStore.Images.Media.insertImage(
+                            getActivity().getContentResolver(),
+                            MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri),
+                            "temp", null);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }*/
+                performCrop(imageUri);
                 break;
             case REQUEST_CODE_PICTURE_SELECT:
                 if (resultCode == Activity.RESULT_OK) {
@@ -88,6 +98,7 @@ public class FragmentMissingAvatar extends Fragment {
                 }
             case REQUEST_CODE_PICTURE_CROP:
                 if (resultCode == Activity.RESULT_OK) {
+                    ((MainActivity) getActivity()).displayMissingAvatar(false);
                     Bitmap selectedBitmap = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() + "/tempAva.jpg");
                     Backendless.Files.Android.upload(
                             selectedBitmap,
@@ -98,12 +109,12 @@ public class FragmentMissingAvatar extends Fragment {
                                 @Override
                                 public void handleResponse(final BackendlessFile backendlessFile) {
                                     Log.d("test", "Uploaded successfully");
-                                    ((MainActivity) getActivity()).displayMissingAvatar(false);
                                 }
 
                                 @Override
                                 public void handleFault(BackendlessFault backendlessFault) {
                                     Log.d("test", "Failed to upload " + backendlessFault.getMessage());
+                                    ((MainActivity) getActivity()).displayMissingAvatar(true);
                                 }
                             });
                 }

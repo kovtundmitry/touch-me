@@ -26,7 +26,7 @@ import tachos.ru.touch.me.R;
 import tachos.ru.touch.me.ServerConnection;
 import tachos.ru.touch.me.data.Avatar;
 
-public class GameFragment extends Fragment implements IServer {
+public class FragmentGame extends Fragment implements IServer {
     private static final int xMaskSize = 200;
     private static final int yMaskSize = 200;
     final Paint paintTrans = new Paint();

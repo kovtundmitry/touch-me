@@ -27,7 +27,7 @@ public class DataManager {
             lastActivityUpdater = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    while (!lastActivityUpdater.isInterrupted()) {
+                    while (lastActivityUpdater != null && !lastActivityUpdater.isInterrupted()) {
                         if (Backendless.UserService.CurrentUser() == null) {
                             stopLastActivityUpdater();
                             return;
@@ -67,7 +67,7 @@ public class DataManager {
         queryOptions.addSortByOption("lastOnline DESC");
         queryOptions.setPageSize(usersPageSize);
         dataQuery.setQueryOptions(queryOptions);
-        dataQuery.setWhereClause("objectId != \'" + Backendless.UserService.CurrentUser().getUserId()+"\'");
+        dataQuery.setWhereClause("objectId != \'" + Backendless.UserService.CurrentUser().getUserId() + "\'");
         Backendless.Persistence.of(Users.class).find(dataQuery, asyncCallback);
     }
 

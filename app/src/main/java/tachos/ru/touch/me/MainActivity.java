@@ -26,21 +26,19 @@ import com.nostra13.universalimageloader.utils.L;
 
 import io.fabric.sdk.android.Fabric;
 import tachos.ru.touch.me.data.DataManager;
+import tachos.ru.touch.me.fragments.FragmentGame;
 import tachos.ru.touch.me.fragments.FragmentLogin;
 import tachos.ru.touch.me.fragments.FragmentMissingAvatar;
+import tachos.ru.touch.me.fragments.FragmentRegister;
 import tachos.ru.touch.me.fragments.FragmentUsers;
-import tachos.ru.touch.me.fragments.GameFragment;
 
 public class MainActivity extends Activity {
     static final int MESSAGE_GAME_INVITE = 1;
     static final int MESSAGE_GAME_ACCEPTED = 2;
     static final int MESSAGE_GAME_DECLINED = 3;
-    private static final int CURR_FRAGMENT_GAME = 1;
-    private static final int CURR_FRAGMENT_USERS = 2;
     public static AlertDialog currDialog = null;
-    static Handler handlerMessages;
     public static String partnerId = "";
-    private int currFragment = -1;
+    static Handler handlerMessages;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +49,8 @@ public class MainActivity extends Activity {
 
         DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true)
                 .showImageOnLoading(android.R.drawable.ic_lock_lock) // resource or drawable
-                .showImageForEmptyUri(android.R.drawable.ic_media_next) // resource or drawable
-                .showImageOnFail(android.R.drawable.ic_menu_close_clear_cancel).build();
+                .showImageForEmptyUri(android.R.drawable.ic_lock_lock) // resource or drawable
+                .showImageOnFail(android.R.drawable.ic_lock_lock).build();
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).defaultDisplayImageOptions(defaultOptions).build();
         ImageLoader.getInstance().init(config);
         L.writeLogs(false);
@@ -79,7 +77,7 @@ public class MainActivity extends Activity {
                 });
 
         } else {
-            startFragmentLogin();
+            startFragmentRegister();
         }
     }
 
@@ -144,18 +142,14 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        switch (currFragment) {
-            default: {
-                super.onBackPressed();
-                break;
+        if (getFragmentManager().findFragmentByTag(FragmentGame.class.getName()) != null) {
+            startFragmentUsers();
+            if (ServerConnection.getInstance() != null) {
+                ServerConnection.getInstance().disconnect();
             }
-            case CURR_FRAGMENT_GAME: {
-                startFragmentUsers();
-                if (ServerConnection.getInstance() != null)
-                    ServerConnection.getInstance().disconnect();
-                break;
-            }
+            return;
         }
+        super.onBackPressed();
     }
 
     @Override
@@ -183,8 +177,7 @@ public class MainActivity extends Activity {
     }
 
     public void startFragmentGame() {
-        currFragment = CURR_FRAGMENT_GAME;
-        replaceFragment(new GameFragment());
+        replaceFragment(new FragmentGame());
     }
 
     @Override
@@ -195,8 +188,11 @@ public class MainActivity extends Activity {
     }
 
     public void startFragmentUsers() {
-        currFragment = CURR_FRAGMENT_USERS;
         replaceFragment(new FragmentUsers());
+    }
+
+    public void startFragmentRegister() {
+        replaceFragment(new FragmentRegister());
     }
 
     private void initBackendless() {
@@ -207,7 +203,7 @@ public class MainActivity extends Activity {
     private void replaceFragment(Fragment fragment) {
         FragmentManager manager = getFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.replace(R.id.fl_main_container, fragment);
+        transaction.replace(R.id.fl_main_container, fragment, fragment.getClass().getName());
         transaction.commit();
     }
 }

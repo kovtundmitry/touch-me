@@ -76,6 +76,10 @@ public class FragmentUsers extends Fragment {
         lvUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                long lastOnline = users.get(position).getLastOnline();
+                if (System.currentTimeMillis() - lastOnline >= 20000) {
+                    return;
+                }
                 Messenger.sendInvite(users.get(position).getObjectId());
                 MainActivity.currDialog = new AlertDialog.Builder(getActivity()).create();
                 MainActivity.currDialog.setTitle("Invite send");

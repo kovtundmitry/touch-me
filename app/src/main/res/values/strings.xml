@@ -7,4 +7,5 @@
     <string name="button.register">Register</string>
     <string name="button.logout">LogOut</string>
     <string name="button.game.exit">Exit</string>
+    <string name="fragment.login.stay.logged.in">Stay logged in</string>
 </resources>

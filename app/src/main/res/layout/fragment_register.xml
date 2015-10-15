@@ -21,6 +21,12 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/til.login.login">
 
+        <EditText
+            android:id="@+id/et.login.name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint.name"
+            android:inputType="text" />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
@@ -38,31 +44,30 @@
     </android.support.design.widget.TextInputLayout>
 
     <Button
-        android:id="@+id/bt.login.login"
+        android:id="@+id/bt.login.register"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/til.login.password"
-        android:text="@string/button.login" />
+        android:text="@string/button.register" />
 
     <CheckBox
-        android:id="@+id/cb.fragment.login.stay"
+        android:id="@+id/cb.fragment.register.stay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/bt.login.login"
-        android:layout_toEndOf="@+id/bt.login.login"
-        android:layout_toRightOf="@+id/bt.login.login"
+        android:layout_alignBottom="@+id/bt.login.register"
+        android:layout_toEndOf="@+id/bt.login.register"
+        android:layout_toRightOf="@+id/bt.login.register"
         android:text="@string/fragment.login.stay.logged.in" />
 
     <Button
-        android:id="@+id/bt.fragment.login.register"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Already have an account?"
+        android:id="@+id/bt.fragment.register.allready.register"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:text="New account" />
-
+        android:layout_alignParentEnd="true" />
 </RelativeLayout>

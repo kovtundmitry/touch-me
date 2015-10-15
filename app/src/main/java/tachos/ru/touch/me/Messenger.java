@@ -112,7 +112,7 @@ public class Messenger {
                 for (Message message : response) {
                     String publisherId = message.getPublisherId();
                     Object data = message.getData();
-
+                    Log.d("test", message.getMessageId());
                     if (MainActivity.handlerMessages != null) {
                         android.os.Message msg = null;
                         if (data.toString().contains(COMMAND_INVITE) && partnerId == null) {
