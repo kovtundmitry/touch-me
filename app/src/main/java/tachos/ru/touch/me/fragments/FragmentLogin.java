@@ -14,13 +14,17 @@ import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.BackendlessUser;
+import com.backendless.async.callback.AsyncCallback;
 import com.backendless.async.callback.BackendlessCallback;
 import com.backendless.exceptions.BackendlessFault;
+
+import java.util.List;
 
 import tachos.ru.touch.me.MainActivity;
 import tachos.ru.touch.me.Messenger;
 import tachos.ru.touch.me.R;
 import tachos.ru.touch.me.data.DataManager;
+import tachos.ru.touch.me.data.Users;
 
 public class FragmentLogin extends Fragment {
     EditText etLogin;
@@ -38,9 +42,20 @@ public class FragmentLogin extends Fragment {
                     }
 
                     @Override
-                    public void handleResponse(BackendlessUser backendlessUser) {
+                    public void handleResponse(final BackendlessUser backendlessUser) {
                         Log.d("Login", backendlessUser.getEmail() + " successfully logged in");
-                        callback.handleResponse(backendlessUser);
+                        DataManager.updateLikedUsers(new AsyncCallback<List<Users>>() {
+                            @Override
+                            public void handleResponse(List<Users> response) {
+                                callback.handleResponse(backendlessUser);
+                            }
+
+                            @Override
+                            public void handleFault(BackendlessFault fault) {
+                                Log.d("Login", "Error logging in: " + fault.getMessage());
+                                callback.handleFault(fault);
+                            }
+                        });
                     }
                 },
                 stayLoggedIn);

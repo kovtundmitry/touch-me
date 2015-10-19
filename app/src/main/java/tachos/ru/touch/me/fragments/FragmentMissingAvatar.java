@@ -22,7 +22,6 @@ import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.files.BackendlessFile;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -35,6 +34,7 @@ public class FragmentMissingAvatar extends Fragment {
     private static final int REQUEST_CODE_PICTURE_CROP = 1718;
     private static final int REQUEST_CODE_CAMERA = 1719;
     private static FragmentMissingAvatar instance = null;
+    Uri imageUri;
 
     public FragmentMissingAvatar() {
         instance = this;
@@ -57,7 +57,7 @@ public class FragmentMissingAvatar extends Fragment {
                 imageUri = getActivity().getContentResolver().insert(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
                 Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                cameraIntent    .putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
                 startActivityForResult(cameraIntent, REQUEST_CODE_CAMERA);
             }
         });
@@ -72,7 +72,6 @@ public class FragmentMissingAvatar extends Fragment {
         return root;
     }
 
-    Uri imageUri;
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d("test", "Activity result " + requestCode + " " + resultCode);

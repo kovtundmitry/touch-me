@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import tachos.ru.touch.me.MainActivity;
 import tachos.ru.touch.me.Messenger;
 import tachos.ru.touch.me.R;
+import tachos.ru.touch.me.adapters.AdapterListViewLikedUsers;
 import tachos.ru.touch.me.adapters.AdapterListViewUsers;
 import tachos.ru.touch.me.data.Avatar;
 import tachos.ru.touch.me.data.DataManager;
@@ -35,16 +37,24 @@ public class FragmentUsers extends Fragment {
     ListView lvUsers;
     AdapterListViewUsers adapterUsers;
     ArrayList<Users> users = new ArrayList<>();
+    boolean isPaused = false;
 
+
+    //--Drawer
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+private AdapterListViewLikedUsers adapterListViewLikedUsers;
+    //--
     private void startUsersUpdater(long time) {
-        if (getActivity() == null) return;
+        if (getActivity() == null || isPaused) return;
         (new Handler()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (getActivity() != null)
+                if (getActivity() != null && !isPaused)
                     DataManager.getUsers(new AsyncCallback<BackendlessCollection<Users>>() {
                         @Override
                         public void handleResponse(BackendlessCollection<Users> response) {
+                            if (getActivity() == null && isPaused) return;
                             users.clear();
                             users.addAll(response.getData());
                             adapterUsers.notifyDataSetChanged();
@@ -62,8 +72,16 @@ public class FragmentUsers extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        isPaused = false;
+        startUsersUpdater(0);
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
+        isPaused = true;
     }
 
     @Override
@@ -76,10 +94,6 @@ public class FragmentUsers extends Fragment {
         lvUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                long lastOnline = users.get(position).getLastOnline();
-                if (System.currentTimeMillis() - lastOnline >= 20000) {
-                    return;
-                }
                 Messenger.sendInvite(users.get(position).getObjectId());
                 MainActivity.currDialog = new AlertDialog.Builder(getActivity()).create();
                 MainActivity.currDialog.setTitle("Invite send");
@@ -112,7 +126,6 @@ public class FragmentUsers extends Fragment {
                 });
             }
         });
-        startUsersUpdater(0);
 
         ImageLoader.getInstance().loadImage(Avatar.generateFullPathToAva(Backendless.UserService.CurrentUser().getUserId()), new SimpleImageLoadingListener() {
             @Override
@@ -128,6 +141,34 @@ public class FragmentUsers extends Fragment {
                 Log.d("test", "Image failed to load " + failReason.toString());
             }
         });
+
+        //--Drawer
+        mDrawerLayout = (DrawerLayout) root.findViewById(R.id.dl_fragment_user_liked_users);
+        mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+if (newState==DrawerLayout.STATE_DRAGGING){adapterListViewLikedUsers.notifyDataSetChanged();}
+            }
+        });
+        mDrawerList = (ListView) root.findViewById(R.id.lv_fragment_user_liked_users);
+        adapterListViewLikedUsers =new AdapterListViewLikedUsers(DataManager.getLikedUsers(), getActivity());
+        mDrawerList.setAdapter(adapterListViewLikedUsers);
+        //
         return root;
     }
 }

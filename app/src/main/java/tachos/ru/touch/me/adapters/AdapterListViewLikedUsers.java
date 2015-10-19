@@ -5,8 +5,6 @@ import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,14 +14,13 @@ import java.util.List;
 
 import tachos.ru.touch.me.R;
 import tachos.ru.touch.me.data.Avatar;
-import tachos.ru.touch.me.data.DataManager;
 import tachos.ru.touch.me.data.Users;
 
-public class AdapterListViewUsers extends BaseAdapter {
+public class AdapterListViewLikedUsers extends BaseAdapter {
     private List<Users> users;
     private Activity activity;
 
-    public AdapterListViewUsers(List<Users> users, Activity activity) {
+    public AdapterListViewLikedUsers(List<Users> users, Activity activity) {
         this.users = users;
         this.activity = activity;
     }
@@ -49,29 +46,16 @@ public class AdapterListViewUsers extends BaseAdapter {
         ViewHolder holder;
         if (rowView == null) {
             holder = new ViewHolder();
-            rowView = activity.getLayoutInflater().inflate(R.layout.item_users, parent, false);
-            holder.tvName = (TextView) rowView.findViewById(R.id.tv_item_users_name);
-            holder.tvLastActivity = (TextView) rowView.findViewById(R.id.tv_item_users_lastActivity);
-            holder.ivAvatar = (ImageView) rowView.findViewById(R.id.iv_item_users_ava);
-            holder.rbLiked = (CheckBox) rowView.findViewById(R.id.cb_item_users_liked);
+            rowView = activity.getLayoutInflater().inflate(R.layout.item_liked_user, parent, false);
+            holder.tvName = (TextView) rowView.findViewById(R.id.tv_item_liked_name);
+            holder.tvLastActivity = (TextView) rowView.findViewById(R.id.tv_item_liked_users_lastActivity);
+            holder.ivAvatar = (ImageView) rowView.findViewById(R.id.iv_item_liked_user_ava);
             rowView.setTag(holder);
         } else {
             holder = (ViewHolder) rowView.getTag();
         }
         final Users user = users.get(position);
         holder.tvName.setText(user.getName());
-        holder.rbLiked.setOnCheckedChangeListener(null);
-        holder.rbLiked.setChecked(DataManager.getLikedUsersIds().contains(user.getObjectId()));
-        holder.rbLiked.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    DataManager.likeUser(user);
-                } else {
-                    DataManager.unLikeUser(user);
-                }
-            }
-        });
         if (user.getLastOnline() != 0) {
             long lastOnline = users.get(position).getLastOnline();
             if (System.currentTimeMillis() - lastOnline < 20000) {
@@ -104,6 +88,5 @@ public class AdapterListViewUsers extends BaseAdapter {
     static class ViewHolder {
         public TextView tvName, tvLastActivity;
         ImageView ivAvatar;
-        CheckBox rbLiked;
     }
 }

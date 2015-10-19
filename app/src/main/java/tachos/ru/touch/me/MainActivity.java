@@ -1,5 +1,6 @@
 package tachos.ru.touch.me;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -24,8 +25,11 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.utils.L;
 
+import java.util.List;
+
 import io.fabric.sdk.android.Fabric;
 import tachos.ru.touch.me.data.DataManager;
+import tachos.ru.touch.me.data.Users;
 import tachos.ru.touch.me.fragments.FragmentGame;
 import tachos.ru.touch.me.fragments.FragmentLogin;
 import tachos.ru.touch.me.fragments.FragmentMissingAvatar;
@@ -50,7 +54,8 @@ public class MainActivity extends Activity {
         DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true)
                 .showImageOnLoading(android.R.drawable.ic_lock_lock) // resource or drawable
                 .showImageForEmptyUri(android.R.drawable.ic_lock_lock) // resource or drawable
-                .showImageOnFail(android.R.drawable.ic_lock_lock).build();
+                .showImageOnFail(android.R.drawable.ic_lock_lock)
+                .build();
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).defaultDisplayImageOptions(defaultOptions).build();
         ImageLoader.getInstance().init(config);
         L.writeLogs(false);
@@ -64,9 +69,20 @@ public class MainActivity extends Activity {
                     @Override
                     public void handleResponse(BackendlessUser response) {
                         Backendless.UserService.setCurrentUser(response);
-                        Messenger.registerDevice();
-                        DataManager.startLastActivityUpdater();
-                        startFragmentUsers();
+                        DataManager.updateLikedUsers(new AsyncCallback<List<Users>>() {
+                            @Override
+                            public void handleResponse(List<Users> response) {
+                                Messenger.registerDevice();
+                                DataManager.startLastActivityUpdater();
+                                startFragmentUsers();
+                            }
+
+                            @Override
+                            public void handleFault(BackendlessFault fault) {
+                                Log.d("test", "Unable to login");
+                                startFragmentLogin();
+                            }
+                        });
                     }
 
                     @Override
@@ -91,6 +107,7 @@ public class MainActivity extends Activity {
         transaction.commit();
     }
 
+    @SuppressLint("HandlerLeak")
     private void initHandler() {
         handlerMessages = new Handler() {
             public void handleMessage(final android.os.Message msg) {

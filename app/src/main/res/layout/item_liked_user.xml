@@ -1,0 +1,39 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/iv.item.liked.user.ava"
+        android:layout_width="wrap_content"
+        android:layout_height="80dp"
+        android:adjustViewBounds="true"
+        android:src="@android:drawable/btn_star_big_on" />
+
+    <TextView
+        android:id="@+id/tv.item.liked.name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_toEndOf="@id/iv.item.liked.user.ava"
+        android:layout_toRightOf="@id/iv.item.liked.user.ava"
+        android:text="Name" />
+
+    <TextView
+        android:id="@+id/tv.item.liked.users.lastActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:text="lastOnline" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/iv.item.liked.user.ava"
+        android:layout_toEndOf="@id/iv.item.liked.user.ava"
+        android:layout_toRightOf="@id/iv.item.liked.user.ava"
+        android:background="#636363" />
+</RelativeLayout>
