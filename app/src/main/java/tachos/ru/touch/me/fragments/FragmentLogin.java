@@ -71,20 +71,25 @@ public class FragmentLogin extends Fragment {
         root.findViewById(R.id.bt_login_login).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ((MainActivity) getActivity()).startLoading();
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(etPassword.getWindowToken(), 0);
                 login(etLogin.getText().toString(), etPassword.getText().toString(), cbStayLoggedIn.isChecked(), new BackendlessCallback<BackendlessUser>() {
                     @Override
                     public void handleResponse(BackendlessUser response) {
+                        if (getActivity()==null)return;
                         Toast.makeText(getActivity(), response.getEmail() + " successfully logged in", Toast.LENGTH_SHORT).show();
                         DataManager.startLastActivityUpdater();
                         Messenger.registerDevice();
                         ((MainActivity) getActivity()).startFragmentUsers();
+                        ((MainActivity) getActivity()).stopLoading();
                     }
 
                     @Override
                     public void handleFault(BackendlessFault fault) {
+                        if (getActivity()==null)return;
                         Toast.makeText(getActivity(), "Error logging in: " + fault.getMessage(), Toast.LENGTH_SHORT).show();
+                        ((MainActivity) getActivity()).stopLoading();
                     }
                 });
             }

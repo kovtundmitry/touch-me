@@ -56,6 +56,7 @@ public class FragmentRegister extends Fragment {
     }
 
     private void register(final String email, String name, final String password, final boolean stayLoggedIn) {
+        ((MainActivity) getActivity()).startLoading();
         BackendlessUser user = new BackendlessUser();
         user.setEmail(email);
         user.setProperty("name", name);
@@ -63,8 +64,10 @@ public class FragmentRegister extends Fragment {
         Backendless.UserService.register(user, new BackendlessCallback<BackendlessUser>() {
             @Override
             public void handleFault(BackendlessFault fault) {
+                if (getActivity() == null) return;
                 Toast.makeText(getActivity(), "Error registering: " + fault.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.d("Registration", "Error registering: " + fault.getMessage());
+                ((MainActivity) getActivity()).stopLoading();
             }
 
             @Override
@@ -74,16 +77,20 @@ public class FragmentRegister extends Fragment {
                 FragmentLogin.login(email, password, cbStayLoggedIn.isChecked(), new BackendlessCallback<BackendlessUser>() {
                     @Override
                     public void handleResponse(BackendlessUser response) {
+                        if (getActivity() == null) return;
                         Toast.makeText(getActivity(), response.getEmail() + " successfully logged in", Toast.LENGTH_SHORT).show();
                         DataManager.startLastActivityUpdater();
                         Messenger.registerDevice();
                         ((MainActivity) getActivity()).startFragmentUsers();
+                        ((MainActivity) getActivity()).stopLoading();
                     }
 
                     @Override
                     public void handleFault(BackendlessFault fault) {
+                        if (getActivity() == null) return;
                         Toast.makeText(getActivity(), "Error logging in: " + fault.getMessage(), Toast.LENGTH_SHORT).show();
                         ((MainActivity) getActivity()).startFragmentLogin();
+                        ((MainActivity) getActivity()).stopLoading();
                     }
                 });
             }

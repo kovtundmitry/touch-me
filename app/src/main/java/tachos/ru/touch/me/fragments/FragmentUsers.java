@@ -43,7 +43,8 @@ public class FragmentUsers extends Fragment {
     //--Drawer
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
-private AdapterListViewLikedUsers adapterListViewLikedUsers;
+    private AdapterListViewLikedUsers adapterListViewLikedUsers;
+
     //--
     private void startUsersUpdater(long time) {
         if (getActivity() == null || isPaused) return;
@@ -162,11 +163,13 @@ private AdapterListViewLikedUsers adapterListViewLikedUsers;
 
             @Override
             public void onDrawerStateChanged(int newState) {
-if (newState==DrawerLayout.STATE_DRAGGING){adapterListViewLikedUsers.notifyDataSetChanged();}
+                if (newState == DrawerLayout.STATE_DRAGGING) {
+                    adapterListViewLikedUsers.notifyDataSetChanged();
+                }
             }
         });
         mDrawerList = (ListView) root.findViewById(R.id.lv_fragment_user_liked_users);
-        adapterListViewLikedUsers =new AdapterListViewLikedUsers(DataManager.getLikedUsers(), getActivity());
+        adapterListViewLikedUsers = new AdapterListViewLikedUsers(DataManager.getLikedUsers(), getActivity());
         mDrawerList.setAdapter(adapterListViewLikedUsers);
         //
         return root;

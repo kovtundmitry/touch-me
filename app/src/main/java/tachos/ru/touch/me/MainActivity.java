@@ -12,6 +12,8 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.backendless.Backendless;
@@ -43,6 +45,7 @@ public class MainActivity extends Activity {
     public static AlertDialog currDialog = null;
     public static String partnerId = "";
     static Handler handlerMessages;
+    RelativeLayout rlLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,9 +65,17 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
+        rlLoading = (RelativeLayout) findViewById(R.id.rl_activity_main_loading);
+        rlLoading.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            }
+        });
+
         String userToken = UserTokenStorageFactory.instance().getStorage().get();
         if (userToken != null && !userToken.equals("")) {
-            if (Backendless.UserService.CurrentUser() == null)
+            if (Backendless.UserService.CurrentUser() == null) {
+                startLoading();
                 Backendless.UserService.findById(Backendless.UserService.loggedInUser(), new AsyncCallback<BackendlessUser>() {
                     @Override
                     public void handleResponse(BackendlessUser response) {
@@ -74,12 +85,14 @@ public class MainActivity extends Activity {
                             public void handleResponse(List<Users> response) {
                                 Messenger.registerDevice();
                                 DataManager.startLastActivityUpdater();
+                                stopLoading();
                                 startFragmentUsers();
                             }
 
                             @Override
                             public void handleFault(BackendlessFault fault) {
                                 Log.d("test", "Unable to login");
+                                stopLoading();
                                 startFragmentLogin();
                             }
                         });
@@ -88,13 +101,22 @@ public class MainActivity extends Activity {
                     @Override
                     public void handleFault(BackendlessFault fault) {
                         Log.d("test", "Unable to login");
+                        stopLoading();
                         startFragmentLogin();
                     }
                 });
-
+            }
         } else {
             startFragmentRegister();
         }
+    }
+
+    public void startLoading() {
+        rlLoading.setVisibility(View.VISIBLE);
+    }
+
+    public void stopLoading() {
+        rlLoading.setVisibility(View.GONE);
     }
 
     public void displayMissingAvatar(boolean visibility) {
@@ -125,6 +147,7 @@ public class MainActivity extends Activity {
                                     public void onClick(DialogInterface dialog, int which) {
                                         Toast.makeText(MainActivity.this, "Trying to connect", Toast.LENGTH_SHORT).show();
                                         Messenger.sendInviteResponse(pId, true);
+                                        startLoading();
                                         dialog.dismiss();
                                     }
                                 });
@@ -147,6 +170,7 @@ public class MainActivity extends Activity {
                         currDialog.dismiss();
                         partnerId = pId;
                         startFragmentGame();
+                        stopLoading();
                         break;
                     case MESSAGE_GAME_DECLINED:
                         currDialog.dismiss();

@@ -10,10 +10,13 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.backendless.async.callback.AsyncCallback;
+import com.backendless.exceptions.BackendlessFault;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.List;
 
+import tachos.ru.touch.me.MainActivity;
 import tachos.ru.touch.me.R;
 import tachos.ru.touch.me.data.Avatar;
 import tachos.ru.touch.me.data.DataManager;
@@ -65,10 +68,36 @@ public class AdapterListViewUsers extends BaseAdapter {
         holder.rbLiked.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (activity == null) return;
+                ((MainActivity) activity).startLoading();
                 if (isChecked) {
-                    DataManager.likeUser(user);
+                    DataManager.likeUser(user, new AsyncCallback<Users>() {
+                        @Override
+                        public void handleResponse(Users response) {
+                            if (activity == null) return;
+                            ((MainActivity) activity).stopLoading();
+                        }
+
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            if (activity == null) return;
+                            ((MainActivity) activity).stopLoading();
+                        }
+                    });
                 } else {
-                    DataManager.unLikeUser(user);
+                    DataManager.unLikeUser(user, new AsyncCallback<Users>() {
+                        @Override
+                        public void handleResponse(Users response) {
+                            if (activity == null) return;
+                            ((MainActivity) activity).stopLoading();
+                        }
+
+                        @Override
+                        public void handleFault(BackendlessFault fault) {
+                            if (activity == null) return;
+                            ((MainActivity) activity).stopLoading();
+                        }
+                    });
                 }
             }
         });

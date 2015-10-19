@@ -35,23 +35,25 @@ public class DataManager {
         return likedUsersIds;
     }
 
-    public static void likeUser(Users user) {
+    public static void likeUser(Users user, final AsyncCallback<Users> callback) {
         likedUsersIds.add(user.getObjectId());
         currUser.getLikedUsers().add(user);
         Backendless.Persistence.save(currUser, new AsyncCallback<Users>() {
             @Override
             public void handleResponse(Users response) {
                 Log.d("test", "like ok");
+                callback.handleResponse(response);
             }
 
             @Override
             public void handleFault(BackendlessFault fault) {
                 Log.d("test", "like not ok!");
+                callback.handleFault(fault);
             }
         });
     }
 
-    public static void unLikeUser(Users user) {
+    public static void unLikeUser(Users user, final AsyncCallback<Users> callback) {
         likedUsersIds.remove(user.getObjectId());
         for (Users likedUser : currUser.getLikedUsers()) {
             if (likedUser.getObjectId().equals(user.getObjectId())) {
@@ -63,11 +65,12 @@ public class DataManager {
             @Override
             public void handleResponse(Users response) {
                 Log.d("test", "unlike ok");
+                callback.handleResponse(response);
             }
 
             @Override
             public void handleFault(BackendlessFault fault) {
-
+                callback.handleFault(fault);
                 Log.d("test", "unlike not ok!");
             }
         });

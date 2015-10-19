@@ -51,6 +51,7 @@ public class FragmentMissingAvatar extends Fragment {
         root.findViewById(R.id.bt_missing_avatar_take_photo).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ((MainActivity) getActivity()).startLoading();
                 ContentValues values = new ContentValues();
                 values.put(MediaStore.Images.Media.TITLE, "New Picture");
                 values.put(MediaStore.Images.Media.DESCRIPTION, "From your Camera");
@@ -64,6 +65,7 @@ public class FragmentMissingAvatar extends Fragment {
         root.findViewById(R.id.bt_missing_avatar_take_gallery).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ((MainActivity) getActivity()).startLoading();
                 Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
                 photoPickerIntent.setType("image/*");
                 startActivityForResult(photoPickerIntent, REQUEST_CODE_PICTURE_SELECT);
@@ -74,6 +76,7 @@ public class FragmentMissingAvatar extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        ((MainActivity) getActivity()).stopLoading();
         Log.d("test", "Activity result " + requestCode + " " + resultCode);
         switch (requestCode) {
             case REQUEST_CODE_CAMERA:
@@ -99,6 +102,7 @@ public class FragmentMissingAvatar extends Fragment {
                 if (resultCode == Activity.RESULT_OK) {
                     ((MainActivity) getActivity()).displayMissingAvatar(false);
                     Bitmap selectedBitmap = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() + "/tempAva.jpg");
+                    ((MainActivity) getActivity()).startLoading();
                     Backendless.Files.Android.upload(
                             selectedBitmap,
                             Bitmap.CompressFormat.JPEG, 100,
@@ -108,12 +112,16 @@ public class FragmentMissingAvatar extends Fragment {
                                 @Override
                                 public void handleResponse(final BackendlessFile backendlessFile) {
                                     Log.d("test", "Uploaded successfully");
+                                    if (getActivity() == null) return;
+                                    ((MainActivity) getActivity()).stopLoading();
                                 }
 
                                 @Override
                                 public void handleFault(BackendlessFault backendlessFault) {
                                     Log.d("test", "Failed to upload " + backendlessFault.getMessage());
+                                    if (getActivity() == null) return;
                                     ((MainActivity) getActivity()).displayMissingAvatar(true);
+                                    ((MainActivity) getActivity()).stopLoading();
                                 }
                             });
                 }
@@ -123,7 +131,7 @@ public class FragmentMissingAvatar extends Fragment {
 
     private void performCrop(Uri picUri) {
         try {
-
+            ((MainActivity) getActivity()).startLoading();
             Intent cropIntent = new Intent("com.android.camera.action.CROP");
             // indicate image type and Uri
             cropIntent.setDataAndType(picUri, "image/*");
