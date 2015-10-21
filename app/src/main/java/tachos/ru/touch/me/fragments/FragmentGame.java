@@ -1,6 +1,7 @@
 package tachos.ru.touch.me.fragments;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -8,14 +9,17 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -46,6 +50,8 @@ public class FragmentGame extends Fragment implements IServer {
     private Canvas canvasLines;
     private boolean isTouched = false;
 
+    private CheckBox isVibroEnabled;
+
     static public float percentTransparent(Bitmap bm, int scale) {
         final int width = bm.getWidth();
         final int height = bm.getHeight();
@@ -69,8 +75,8 @@ public class FragmentGame extends Fragment implements IServer {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_game, container, false);
-
-        ImageLoader.getInstance().displayImage(Avatar.generateFullPathToAva(MainActivity.partnerId), (ImageView)root.findViewById(R.id.imageViewBack));
+        isVibroEnabled = (CheckBox) root.findViewById(R.id.cb_fragment_game_vibration);
+        ImageLoader.getInstance().displayImage(Avatar.generateFullPathToAva(MainActivity.partnerId), (ImageView) root.findViewById(R.id.imageViewBack));
 
         enemyFinger = (ImageView) root.findViewById(R.id.enemyFinger);
         canvasImageView = (ImageView) root.findViewById(R.id.imageViewCover);
@@ -93,6 +99,7 @@ public class FragmentGame extends Fragment implements IServer {
                     case MotionEvent.ACTION_UP:
                         isTouched = false;
                         serverConnection.sendCoords(-20, -20);
+                        stopVibrate();
                         break;
                     case MotionEvent.ACTION_DOWN:
                         isTouched = true;
@@ -104,11 +111,14 @@ public class FragmentGame extends Fragment implements IServer {
                                 (int) ((event.getY() >= 0) ? event.getY() : 0) * yMaskSize / canvasImageView.getHeight());
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        if (enemyFinger.getVisibility() != View.VISIBLE) break;
-                        if (Math.abs(enemyFinger.getX() + enemyFinger.getWidth() / 2 - event.getX()) > maxDistance)
+                        // if (enemyFinger.getVisibility() != View.VISIBLE) break;
+                        int xOffset = (int) Math.abs(enemyFinger.getX() + enemyFinger.getWidth() / 2 - event.getX());
+                        int yOffset = (int) Math.abs(enemyFinger.getY() + enemyFinger.getHeight() / 2 - event.getY());
+                        vibrate(75 - Math.max(yOffset / 2, xOffset / 2));
+                        /*if (xOffset > maxDistance)
                             break;
-                        if (Math.abs(enemyFinger.getY() + enemyFinger.getHeight() / 2 - event.getY()) > maxDistance)
-                            break;
+                        if (yOffset > maxDistance)
+                            break;*/
                         canvasLines.drawLine(selfLastX, selfLastY, event.getX(), event.getY(), paintSelf);
                         selfLastX = event.getX();
                         selfLastY = event.getY();
@@ -117,7 +127,8 @@ public class FragmentGame extends Fragment implements IServer {
                         if (serverConnection.isPaired()) {
                             serverConnection.sendCoords((int) ((event.getX() >= 0) ? event.getX() : 0) * xMaskSize / canvasImageView.getWidth(),
                                     (int) ((event.getY() >= 0) ? event.getY() : 0) * yMaskSize / canvasImageView.getHeight());
-                            scratchCover((int) event.getX(), (int) event.getY(), canvas, canvasImageView);
+                            if (enemyFinger.getVisibility() == View.VISIBLE && xOffset <= maxDistance && yOffset <= maxDistance)
+                                scratchCover((int) event.getX(), (int) event.getY(), canvas, canvasImageView);
                             //canvas.drawLine(selfLastX, selfLastY, event.getX(), event.getY(), paintSelf);
                             canvasImageView.invalidate();
                         }
@@ -198,6 +209,12 @@ public class FragmentGame extends Fragment implements IServer {
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        stopVibrate();
+    }
+
     private void hideCover() {
         if (trans) return;
         trans = true;
@@ -229,6 +246,7 @@ public class FragmentGame extends Fragment implements IServer {
                         e.printStackTrace();
                     }
                 }
+                ((Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE)).cancel();
             }
         }).start();
 
@@ -247,7 +265,8 @@ public class FragmentGame extends Fragment implements IServer {
                 int localY = y * canvasImageView.getHeight() / yMaskSize;
 
                 if (x != -20 && y != -20) {
-                    if (isTouched) scratchCover(localX, localY, canvas, canvasImageView);
+                    if (isTouched && Math.abs(selfLastX - localX) <= maxDistance && Math.abs(selfLastY - localY) <= maxDistance)
+                        scratchCover(localX, localY, canvas, canvasImageView);
                     enemyFinger.setVisibility(View.VISIBLE);
                     enemyFinger.setX(localX - enemyFinger.getWidth() / 2);
                     enemyFinger.setY(localY - enemyFinger.getHeight() / 2);
@@ -257,12 +276,29 @@ public class FragmentGame extends Fragment implements IServer {
                     partnerX = localX;
                     partnerY = localY;
                     linesImageView.invalidate();
+                    //!!
+                    /*GradientDrawable myGrad = (GradientDrawable)enemyFinger.getBackground();
+                    myGrad.setStroke(2, Color.GREEN);*/
+                    //!!
                 } else {
+                    //Partner finger's up
+                    stopVibrate();
                     partnerX = -1;
                     partnerY = -1;
                     enemyFinger.setVisibility(View.INVISIBLE);
                 }
             }
         });
+    }
+
+    private void vibrate(int pauseLength) {
+        if (!isVibroEnabled.isChecked()) return;
+        if (pauseLength < 0) pauseLength = 0;
+        long[] pattern = {pauseLength / 2, 1, pauseLength};
+        ((Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE)).vibrate(pattern, 0);
+    }
+
+    private void stopVibrate() {
+        ((Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE)).cancel();
     }
 }

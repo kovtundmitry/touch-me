@@ -54,7 +54,9 @@ public class MainActivity extends Activity {
         initBackendless();
         initHandler();
 
-        DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true)
+        DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
+                .cacheInMemory(true)
+                //.cacheOnDisk(true)
                 .showImageOnLoading(android.R.drawable.ic_lock_lock) // resource or drawable
                 .showImageForEmptyUri(android.R.drawable.ic_lock_lock) // resource or drawable
                 .showImageOnFail(android.R.drawable.ic_lock_lock)

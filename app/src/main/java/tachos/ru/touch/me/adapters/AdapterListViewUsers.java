@@ -1,7 +1,6 @@
 package tachos.ru.touch.me.adapters;
 
 import android.app.Activity;
-import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -105,25 +104,13 @@ public class AdapterListViewUsers extends BaseAdapter {
             long lastOnline = users.get(position).getLastOnline();
             if (System.currentTimeMillis() - lastOnline < 20000) {
                 holder.tvLastActivity.setText("online");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    holder.tvLastActivity.setTextColor(activity.getResources().getColor(R.color.text_online, null));
-                } else {
-                    holder.tvLastActivity.setTextColor(activity.getResources().getColor(R.color.text_online));
-                }
+                holder.tvLastActivity.setTextColor(activity.getResources().getColor(R.color.text_online));
             } else if (System.currentTimeMillis() - lastOnline < 120000) {
                 holder.tvLastActivity.setText("away");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    holder.tvLastActivity.setTextColor(activity.getResources().getColor(R.color.text_away, null));
-                } else {
-                    holder.tvLastActivity.setTextColor(activity.getResources().getColor(R.color.text_away));
-                }
+                holder.tvLastActivity.setTextColor(activity.getResources().getColor(R.color.text_away));
             } else {
                 holder.tvLastActivity.setText("offline");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    holder.tvLastActivity.setTextColor(activity.getResources().getColor(R.color.text_offline, null));
-                } else {
-                    holder.tvLastActivity.setTextColor(activity.getResources().getColor(R.color.text_offline));
-                }
+                holder.tvLastActivity.setTextColor(activity.getResources().getColor(R.color.text_offline));
             }
         } else holder.tvLastActivity.setText("never");
         ImageLoader.getInstance().displayImage(Avatar.generateFullPathToAva(user.getObjectId()), holder.ivAvatar);

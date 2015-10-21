@@ -128,20 +128,22 @@ public class FragmentUsers extends Fragment {
             }
         });
 
-        ImageLoader.getInstance().loadImage(Avatar.generateFullPathToAva(Backendless.UserService.CurrentUser().getUserId()), new SimpleImageLoadingListener() {
-            @Override
-            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+        ImageLoader.getInstance().loadImage(
+                Avatar.generateFullPathToAva(Backendless.UserService.CurrentUser().getUserId()),
+                new SimpleImageLoadingListener() {
+                    @Override
+                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
 //Ava загружена
-                Log.d("test", "Image loaded");
-            }
+                        Log.d("test", "Image loaded");
+                    }
 
-            @Override
-            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                ((MainActivity) getActivity()).displayMissingAvatar(true);
-                //No avatar
-                Log.d("test", "Image failed to load " + failReason.toString());
-            }
-        });
+                    @Override
+                    public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                        ((MainActivity) getActivity()).displayMissingAvatar(true);
+                        //No avatar
+                        Log.d("test", "Image failed to load " + failReason.toString());
+                    }
+                });
 
         //--Drawer
         mDrawerLayout = (DrawerLayout) root.findViewById(R.id.dl_fragment_user_liked_users);

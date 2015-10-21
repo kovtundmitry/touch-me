@@ -2,7 +2,6 @@ package tachos.ru.touch.me.fragments;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -15,12 +14,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 import com.backendless.files.BackendlessFile;
+import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
 import java.io.IOException;
@@ -100,8 +99,7 @@ public class FragmentMissingAvatar extends Fragment {
                 }
             case REQUEST_CODE_PICTURE_CROP:
                 if (resultCode == Activity.RESULT_OK) {
-                    ((MainActivity) getActivity()).displayMissingAvatar(false);
-                    Bitmap selectedBitmap = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() + "/tempAva.jpg");
+                    Bitmap selectedBitmap = BitmapFactory.decodeFile(Environment.getExternalStorageDirectory() + "/touchMe/" + "tempAva.jpg");
                     ((MainActivity) getActivity()).startLoading();
                     Backendless.Files.Android.upload(
                             selectedBitmap,
@@ -113,6 +111,7 @@ public class FragmentMissingAvatar extends Fragment {
                                 public void handleResponse(final BackendlessFile backendlessFile) {
                                     Log.d("test", "Uploaded successfully");
                                     if (getActivity() == null) return;
+                                    ((MainActivity) getActivity()).displayMissingAvatar(false);
                                     ((MainActivity) getActivity()).stopLoading();
                                 }
 
@@ -130,37 +129,42 @@ public class FragmentMissingAvatar extends Fragment {
     }
 
     private void performCrop(Uri picUri) {
+        //try {
+        ((MainActivity) getActivity()).startLoading();
+        /*Intent cropIntent = new Intent("com.android.camera.action.CROP");
+        // indicate image type and Uri
+        cropIntent.setDataAndType(picUri, "image*//*");
+        // set crop properties
+        cropIntent.putExtra("crop", "true");
+        // indicate aspect of desired crop
+        cropIntent.putExtra("aspectX", 3);
+        cropIntent.putExtra("aspectY", 4);
+        // indicate output X and Y
+        cropIntent.putExtra("outputX", 768);
+        cropIntent.putExtra("outputY", 1024);
+        // retrieve data on return
+        cropIntent.putExtra("return-data", true);
+        //cropIntent.putExtra("scale", true);*/
+        File newDirectory = new File(Environment.getExternalStorageDirectory() + "/touchMe/");
+        newDirectory.mkdirs();
+        File f = new File(newDirectory, "tempAva.jpg");
         try {
-            ((MainActivity) getActivity()).startLoading();
-            Intent cropIntent = new Intent("com.android.camera.action.CROP");
-            // indicate image type and Uri
-            cropIntent.setDataAndType(picUri, "image/*");
-            // set crop properties
-            cropIntent.putExtra("crop", "true");
-            // indicate aspect of desired crop
-            cropIntent.putExtra("aspectX", 3);
-            cropIntent.putExtra("aspectY", 4);
-            // indicate output X and Y
-            cropIntent.putExtra("outputX", 768);
-            cropIntent.putExtra("outputY", 1024);
-            // retrieve data on return
-            cropIntent.putExtra("return-data", true);
-            cropIntent.putExtra("scale", true);
-            File f = new File(Environment.getExternalStorageDirectory(), "tempAva.jpg");
-            try {
-                f.createNewFile();
-            } catch (IOException e) {
-            }
-            cropIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
-            // start the activity - we handle returning in onActivityResult
-            startActivityForResult(cropIntent, REQUEST_CODE_PICTURE_CROP);
+            f.delete();
+            f.createNewFile();
+
+        } catch (IOException e) {
         }
+        //cropIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+        // start the activity - we handle returning in onActivityResult
+        Crop.of(picUri, Uri.fromFile(f)).withMaxSize(768, 1024).withAspect(3, 4).start(getActivity(), this, REQUEST_CODE_PICTURE_CROP);
+        //startActivityForResult(cropIntent, REQUEST_CODE_PICTURE_CROP);
+        // }
         // respond to users whose devices do not support the crop action
-        catch (ActivityNotFoundException anfe) {
+       /* catch (ActivityNotFoundException anfe) {
             // display an error message
             String errorMessage = "Whoops - your device doesn't support the crop action!";
             Toast toast = Toast.makeText(getActivity(), errorMessage, Toast.LENGTH_SHORT);
             toast.show();
-        }
+        }*/
     }
 }
