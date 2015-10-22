@@ -9,9 +9,10 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -46,10 +47,12 @@ public class FragmentGame extends Fragment implements IServer {
     float selfLastY;
     float partnerX = -1;
     float partnerY = -1;
+    Drawable circleDrawable;
+    Handler fingerPainter;
+    long lastTimeTouchReceived = 0;
     private Canvas canvas;
     private Canvas canvasLines;
     private boolean isTouched = false;
-
     private CheckBox isVibroEnabled;
 
     static public float percentTransparent(Bitmap bm, int scale) {
@@ -72,13 +75,46 @@ public class FragmentGame extends Fragment implements IServer {
         return ((float) totalTransparent) / (scale * scale);
     }
 
+    void updateFingerColor(long delay) {
+        if (fingerPainter == null) return;
+        fingerPainter.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (lastTimeTouchReceived == 0) {
+                    updateFingerColor(500);
+                    return;
+                }
+                long timeBetweenTouches = System.currentTimeMillis() - lastTimeTouchReceived;
+                if (timeBetweenTouches <= 500) {
+                    updateFingerColor(15);
+                    circleDrawable.setColorFilter(Color.parseColor("#00FF00"), PorterDuff.Mode.SRC_ATOP);
+                    return;
+                }
+                if (timeBetweenTouches <= 2000) {
+                    circleDrawable.setColorFilter(Color.parseColor("#" + Integer.toHexString(((int) timeBetweenTouches * 255 / 2000)) + "FF00"), PorterDuff.Mode.SRC_ATOP);
+                    updateFingerColor(15);
+                    return;
+                }
+                if (timeBetweenTouches <= 5000) {
+                    circleDrawable.setColorFilter(Color.parseColor("#FF" + Integer.toHexString(Math.max(255 - ((int) (timeBetweenTouches - 2000) * 255 / 3000), 16)) + "00"), PorterDuff.Mode.SRC_ATOP);
+                    updateFingerColor(15);
+                    return;
+                }
+                circleDrawable.setColorFilter(Color.parseColor("#FF0000"), PorterDuff.Mode.SRC_ATOP);
+            }
+        }, delay);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        circleDrawable = getActivity().getResources().getDrawable(R.drawable.circle);
+        fingerPainter = new Handler();
         root = inflater.inflate(R.layout.fragment_game, container, false);
         isVibroEnabled = (CheckBox) root.findViewById(R.id.cb_fragment_game_vibration);
         ImageLoader.getInstance().displayImage(Avatar.generateFullPathToAva(MainActivity.partnerId), (ImageView) root.findViewById(R.id.imageViewBack));
 
         enemyFinger = (ImageView) root.findViewById(R.id.enemyFinger);
+        enemyFinger.setBackgroundDrawable(circleDrawable);
         canvasImageView = (ImageView) root.findViewById(R.id.imageViewCover);
         linesImageView = (ImageView) root.findViewById(R.id.imageViewCanvas);
         paintTrans.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
@@ -213,6 +249,7 @@ public class FragmentGame extends Fragment implements IServer {
     public void onPause() {
         super.onPause();
         stopVibrate();
+        fingerPainter = null;
     }
 
     private void hideCover() {
@@ -247,6 +284,7 @@ public class FragmentGame extends Fragment implements IServer {
                     }
                 }
                 ((Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE)).cancel();
+                canvasImageView.setVisibility(View.INVISIBLE);
             }
         }).start();
 
@@ -267,6 +305,9 @@ public class FragmentGame extends Fragment implements IServer {
                 if (x != -20 && y != -20) {
                     if (isTouched && Math.abs(selfLastX - localX) <= maxDistance && Math.abs(selfLastY - localY) <= maxDistance)
                         scratchCover(localX, localY, canvas, canvasImageView);
+                    circleDrawable.setColorFilter(Color.parseColor("#00FF00"), PorterDuff.Mode.SRC_ATOP);
+                    lastTimeTouchReceived = System.currentTimeMillis();
+                    updateFingerColor(0);
                     enemyFinger.setVisibility(View.VISIBLE);
                     enemyFinger.setX(localX - enemyFinger.getWidth() / 2);
                     enemyFinger.setY(localY - enemyFinger.getHeight() / 2);
@@ -286,6 +327,7 @@ public class FragmentGame extends Fragment implements IServer {
                     partnerX = -1;
                     partnerY = -1;
                     enemyFinger.setVisibility(View.INVISIBLE);
+                    lastTimeTouchReceived = 0;
                 }
             }
         });
