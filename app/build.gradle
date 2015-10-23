@@ -10,10 +10,14 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
+preBuild.doFirst {
+    assert file("./fabric.properties").exists()
+    assert file("./backendless.properties").exists()
+}
+
 repositories {
     maven { url 'https://maven.fabric.io/public' }
 }
-
 
 android {
     compileSdkVersion 22
@@ -23,8 +27,13 @@ android {
         applicationId "tachos.ru.touch.me"
         minSdkVersion 15
         targetSdkVersion 22
-        versionCode 4
-        versionName "1.0.4"
+        versionCode 6
+        versionName "0.2.1"
+
+        Properties backendlessProperties = new Properties()
+        File propsFile = new File("app/backendless.properties")
+        backendlessProperties.load(propsFile.newDataInputStream())
+        buildConfigField "String", "backendlessSk", backendlessProperties.getProperty("backendlessSk")
     }
     buildTypes {
         release {

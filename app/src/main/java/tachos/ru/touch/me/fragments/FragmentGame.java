@@ -15,12 +15,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -30,6 +30,8 @@ import tachos.ru.touch.me.MainActivity;
 import tachos.ru.touch.me.R;
 import tachos.ru.touch.me.ServerConnection;
 import tachos.ru.touch.me.data.Avatar;
+import tachos.ru.touch.me.dialogs.DialogVibroSettings;
+import tachos.ru.touch.me.utils.VibrationSettings;
 
 public class FragmentGame extends Fragment implements IServer {
     private static final int xMaskSize = 200;
@@ -50,10 +52,12 @@ public class FragmentGame extends Fragment implements IServer {
     Drawable circleDrawable;
     Handler fingerPainter;
     long lastTimeTouchReceived = 0;
+    VibrationSettings vibrationSettings;
+    int screenDim;
     private Canvas canvas;
     private Canvas canvasLines;
     private boolean isTouched = false;
-    private CheckBox isVibroEnabled;
+    private long nextVibrate = 0;
 
     static public float percentTransparent(Bitmap bm, int scale) {
         final int width = bm.getWidth();
@@ -110,7 +114,20 @@ public class FragmentGame extends Fragment implements IServer {
         circleDrawable = getActivity().getResources().getDrawable(R.drawable.circle);
         fingerPainter = new Handler();
         root = inflater.inflate(R.layout.fragment_game, container, false);
-        isVibroEnabled = (CheckBox) root.findViewById(R.id.cb_fragment_game_vibration);
+        root.findViewById(R.id.bt_fragment_game_vibro_settings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogVibroSettings dialog = new DialogVibroSettings();
+                dialog.setCancelable(false);
+                dialog.show(getActivity().getFragmentManager(), "DialogVibroSettings");
+                dialog.setConfigChangedListener(new DialogVibroSettings.InterfaceDialogVibroSettings() {
+                    @Override
+                    public void onConfigChanged() {
+                        vibrationSettings = new VibrationSettings(getActivity());
+                    }
+                });
+            }
+        });
         ImageLoader.getInstance().displayImage(Avatar.generateFullPathToAva(MainActivity.partnerId), (ImageView) root.findViewById(R.id.imageViewBack));
 
         enemyFinger = (ImageView) root.findViewById(R.id.enemyFinger);
@@ -148,9 +165,9 @@ public class FragmentGame extends Fragment implements IServer {
                         break;
                     case MotionEvent.ACTION_MOVE:
                         // if (enemyFinger.getVisibility() != View.VISIBLE) break;
-                        int xOffset = (int) Math.abs(enemyFinger.getX() + enemyFinger.getWidth() / 2 - event.getX());
-                        int yOffset = (int) Math.abs(enemyFinger.getY() + enemyFinger.getHeight() / 2 - event.getY());
-                        vibrate(75 - Math.max(yOffset / 2, xOffset / 2));
+                        double xOffset = Math.abs(enemyFinger.getX() + enemyFinger.getWidth() / 2 - event.getX());
+                        double yOffset = Math.abs(enemyFinger.getY() + enemyFinger.getHeight() / 2 - event.getY());
+                        vibrate(Math.sqrt(Math.pow(yOffset, 2) + Math.pow(xOffset, 2)));
                         /*if (xOffset > maxDistance)
                             break;
                         if (yOffset > maxDistance)
@@ -187,7 +204,7 @@ public class FragmentGame extends Fragment implements IServer {
                 canvasLines = new Canvas(bitmapLines);
                 linesImageView.setImageBitmap(bitmapLines);
                 linesImageView.invalidate();
-
+                screenDim = Math.max(root.getWidth(), root.getHeight());
             }
         });
         return root;
@@ -246,10 +263,18 @@ public class FragmentGame extends Fragment implements IServer {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        vibrationSettings = new VibrationSettings(getActivity());
+    }
+
+    @Override
     public void onPause() {
-        super.onPause();
         stopVibrate();
         fingerPainter = null;
+        vibrationSettings.saveSettings(getActivity());
+        super.onPause();
+        Log.d("test", "pause");
     }
 
     private void hideCover() {
@@ -333,11 +358,17 @@ public class FragmentGame extends Fragment implements IServer {
         });
     }
 
-    private void vibrate(int pauseLength) {
-        if (!isVibroEnabled.isChecked()) return;
+    private void vibrate(double distanceBetweenFingers) {
+        if (!vibrationSettings.isVibrationEnabled()) return;
+        if (nextVibrate > System.currentTimeMillis()) return;
+        distanceBetweenFingers = 100 * distanceBetweenFingers / screenDim;
+        long vibrationLength = (long) (vibrationSettings.getLengthMinValue() + distanceBetweenFingers * vibrationSettings.getLengthMultiplier());
+        long pauseLength = (long) (vibrationSettings.getPauseMinValue() + distanceBetweenFingers * vibrationSettings.getPauseMultiplier());
+        if (vibrationLength < 0) vibrationLength = 0;
         if (pauseLength < 0) pauseLength = 0;
-        long[] pattern = {pauseLength / 2, 1, pauseLength};
+        long[] pattern = {0, vibrationLength, pauseLength};
         ((Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE)).vibrate(pattern, 0);
+        nextVibrate = System.currentTimeMillis() + pauseLength + vibrationLength;
     }
 
     private void stopVibrate() {

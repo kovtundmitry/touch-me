@@ -8,4 +8,9 @@
     <string name="button.logout">LogOut</string>
     <string name="button.game.exit">Exit</string>
     <string name="fragment.login.stay.logged.in">Stay logged in</string>
+    <string name="dialog.vibro.vibration.ratio">Vibration ratio: %1$.2f</string>
+    <string name="dialog.vibro.length.min">Vibration min length: %1$dms</string>
+    <string name="dialog.vibro.pause.min">Pause min length: %1$dms</string>
+    <string name="dialog.vibro.pause.ratio">Pause ratio: %1$.2f</string>
+    <string name="dialog.vibro.enabled">Enabled</string>
 </resources>

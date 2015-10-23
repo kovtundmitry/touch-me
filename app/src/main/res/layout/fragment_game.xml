@@ -32,16 +32,16 @@
         android:background="@drawable/circle"
         android:visibility="gone" />
 
-    <CheckBox
-        android:id="@+id/cb.fragment.game.vibration"
+    <Button
+        android:id="@+id/bt.fragment.game.vibro.settings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:padding="8dp"
         android:background="#A0000000"
         android:checked="true"
-        android:text="Vibro"
+        android:padding="16dp"
+        android:text="Vibration Settings"
         android:textColor="#ffffff" />
 </RelativeLayout>

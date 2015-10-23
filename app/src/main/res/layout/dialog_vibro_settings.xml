@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv.dialog.vibro.settings.vibration.min"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/dialog.vibro.length.min" />
+
+    <SeekBar
+        android:id="@+id/sb.dialog.vibro.settings.vibration.min"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:max="300" />
+
+    <TextView
+        android:id="@+id/tv.dialog.vibro.settings.vibration.ratio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/dialog.vibro.vibration.ratio" />
+
+    <SeekBar
+        android:id="@+id/sb.dialog.vibro.settings.vibration.ratio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:max="200" />
+
+    <TextView
+        android:id="@+id/tv.dialog.vibro.settings.pause.min"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/dialog.vibro.pause.min" />
+
+    <SeekBar
+        android:id="@+id/sb.dialog.vibro.settings.pause.min"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:max="300" />
+
+    <TextView
+        android:id="@+id/tv.dialog.vibro.settings.pause.ratio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/dialog.vibro.pause.ratio" />
+
+    <SeekBar
+        android:id="@+id/sb.dialog.vibro.settings.pause.ratio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:max="200" />
+
+    <CheckBox
+        android:id="@+id/cb.dialog.vibro.settings.vibro.enabled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/dialog.vibro.enabled" />
+
+</LinearLayout>

@@ -240,7 +240,7 @@ public class MainActivity extends Activity {
 
     private void initBackendless() {
         String appVersion = "v1";
-        Backendless.initApp(this, Keys.BACKENDLESS_AI, Keys.BACKENDLESS_SK, appVersion);
+        Backendless.initApp(this, "365FC299-BD60-33E4-FF58-FC3CD4CF0100", BuildConfig.backendlessSk, appVersion);
     }
 
     private void replaceFragment(Fragment fragment) {
