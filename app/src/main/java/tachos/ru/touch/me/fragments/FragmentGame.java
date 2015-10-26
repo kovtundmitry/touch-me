@@ -361,13 +361,18 @@ public class FragmentGame extends Fragment implements IServer {
     private void vibrate(double distanceBetweenFingers) {
         if (!vibrationSettings.isVibrationEnabled()) return;
         if (nextVibrate > System.currentTimeMillis()) return;
+
         distanceBetweenFingers = 100 * distanceBetweenFingers / screenDim;
+
         long vibrationLength = (long) (vibrationSettings.getLengthMinValue() + distanceBetweenFingers * vibrationSettings.getLengthMultiplier());
         long pauseLength = (long) (vibrationSettings.getPauseMinValue() + distanceBetweenFingers * vibrationSettings.getPauseMultiplier());
+
         if (vibrationLength < 0) vibrationLength = 0;
         if (pauseLength < 0) pauseLength = 0;
+
         long[] pattern = {0, vibrationLength, pauseLength};
         ((Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE)).vibrate(pattern, 0);
+
         nextVibrate = System.currentTimeMillis() + pauseLength + vibrationLength;
     }
 

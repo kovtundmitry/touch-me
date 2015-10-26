@@ -14,10 +14,10 @@ public class VibrationSettings {
 
     public VibrationSettings(Context context) {
         SharedPreferences sharedPref = getPrefs(context);
-        lengthMinValue = sharedPref.getLong("lengthMinValue", 100);
-        lengthMultiplier = sharedPref.getFloat("lengthMultiplier", 0.5f);
-        pauseMinValue = sharedPref.getLong("pauseMinValue", 100);
-        pauseMultiplier = sharedPref.getFloat("pauseMultiplier", 0.5f);
+        lengthMinValue = sharedPref.getLong("lengthMinValue", 20);
+        lengthMultiplier = sharedPref.getFloat("lengthMultiplier", 0.0f);
+        pauseMinValue = sharedPref.getLong("pauseMinValue", 10);
+        pauseMultiplier = sharedPref.getFloat("pauseMultiplier", 1.0f);
         strongerWhenFarther = sharedPref.getBoolean("strongerWhenFarther", true);
         vibrationEnabled = sharedPref.getBoolean("vibrationEnabled", true);
     }

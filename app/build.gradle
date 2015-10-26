@@ -33,7 +33,7 @@ android {
         Properties backendlessProperties = new Properties()
         File propsFile = new File("app/backendless.properties")
         backendlessProperties.load(propsFile.newDataInputStream())
-        buildConfigField "String", "backendlessSk", backendlessProperties.getProperty("backendlessSk")
+        buildConfigField "String", "BACKENDLESS_SK", backendlessProperties.getProperty("BACKENDLESS_SK")
     }
     buildTypes {
         release {
