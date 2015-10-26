@@ -15,16 +15,21 @@ import com.backendless.messaging.SubscriptionOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import tachos.ru.touch.me.data.db.PrivateMessage;
+
 public class Messenger {
     private static final String CHANNEL_GAME_INVITE = "gameInviteChannel";
+    private static final String CHANNEL_PM = "personalMessagesChannel";
     private static final String COMMAND_INVITE = "join me";
     private static final String COMMAND_INVITE_ACCEPTED = "invite accepted";
     private static final String COMMAND_INVITE_DECLINED = "invite declined";
     private static final ArrayList<String> channels = new ArrayList<String>() {{
         add(CHANNEL_GAME_INVITE);
+        add(CHANNEL_PM);
     }};
     private static final String DEBUG_TAG = "messenger";
     private static Subscription gameInviteSubscription;
+    private static Subscription privateMessagesSubscription;
     private static String partnerId = null;
     private static boolean needsToResponseInvitation = false;
 
@@ -40,6 +45,10 @@ public class Messenger {
                 Log.d(DEBUG_TAG, "error unregister device: " + fault.getMessage());
             }
         });
+    }
+
+    public static List<PrivateMessage> getLastPrivateMessages(String partnerId, int limit) {
+        return PrivateMessage.find(PrivateMessage.class, "PARTNER_ID = ?", new String[]{partnerId}, null, "RECEIVED_TIME DESC", String.valueOf(limit));
     }
 
     public static void sendInvite(String userId) {
@@ -100,6 +109,7 @@ public class Messenger {
                     }
                 });
         subscribeGameInvite();
+        subscribePersonalMessages();
     }
 
     private static void subscribeGameInvite() {
@@ -134,7 +144,7 @@ public class Messenger {
                         }
                         if (msg != null) MainActivity.handlerMessages.sendMessage(msg);
                     }
-                    Log.d(DEBUG_TAG, "received: " + publisherId + " " + data);
+                    Log.d(DEBUG_TAG, "received: " + "invite " + publisherId + " " + data);
                 }
             }
 
@@ -154,5 +164,40 @@ public class Messenger {
         SubscriptionOptions subsOpt = new SubscriptionOptions();
         subsOpt.setSubtopic(Backendless.UserService.CurrentUser().getUserId());
         Backendless.Messaging.subscribe(CHANNEL_GAME_INVITE, messageCallback, subsOpt, subscriptionCallback);
+    }
+
+    private static void subscribePersonalMessages() {
+        if (privateMessagesSubscription != null) {
+            privateMessagesSubscription.resumeSubscription();
+            return;
+        }
+        AsyncCallback<List<Message>> messageCallback = new AsyncCallback<List<Message>>() {
+            public void handleResponse(List<Message> response) {
+                for (Message message : response) {
+                    String publisherId = message.getPublisherId();
+                    Object data = message.getData();
+                    Log.d(DEBUG_TAG, "received: " + "pm " + publisherId + " " + data);
+                    new PrivateMessage(message.getData().toString(), message.getMessageId(), message.getPublisherId(), true, System.currentTimeMillis()).save();
+
+                    Log.d(DEBUG_TAG, "last message: " + getLastPrivateMessages(message.getPublisherId(), 10).get(0).getText());
+                }
+            }
+
+            public void handleFault(BackendlessFault fault) {
+                Log.d(DEBUG_TAG, fault.getMessage());
+            }
+        };
+        AsyncCallback<Subscription> subscriptionCallback = new AsyncCallback<Subscription>() {
+            public void handleResponse(Subscription response) {
+                privateMessagesSubscription = response;
+            }
+
+            public void handleFault(BackendlessFault fault) {
+                Log.d(DEBUG_TAG, fault.getMessage());
+            }
+        };
+        SubscriptionOptions subsOpt = new SubscriptionOptions();
+        subsOpt.setSubtopic(Backendless.UserService.CurrentUser().getUserId());
+        Backendless.Messaging.subscribe(CHANNEL_PM, messageCallback, subsOpt, subscriptionCallback);
     }
 }
